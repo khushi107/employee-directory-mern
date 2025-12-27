@@ -69,14 +69,23 @@ const employeeService = {
    * @param {string} id - Employee ID
    * @returns {Promise} Success message
    */
-  deleteEmployee: async (id) => {
-    try {
-      const response = await axios.delete(`${API_BASE_URL}/${id}`);
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || { message: 'Failed to delete employee' };
-    }
+deleteEmployee: async (id) => {
+  try {
+    // LOG THE EXACT ID RECEIVED
+    console.log('🔍 Raw ID received:', id);
+    console.log('🔍 ID type:', typeof id);
+    
+    const cleanId = String(id).trim();
+    console.log('🔍 Clean ID:', cleanId);
+    
+    const response = await axios.delete(`${API_BASE_URL}/${cleanId}`);
+    
+    return response.data;
+  } catch (error) {
+    console.error('❌ Delete error:', error);
+    throw error.response?.data || { message: 'Failed to delete employee' };
   }
+}
 };
 
 export default employeeService;

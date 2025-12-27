@@ -150,47 +150,45 @@ const handleDelete = async (employee) => {
    * Handle closing undo toast (delete is permanent after this)
    */
 const handleUndoToastClose = async () => {
-  console.log('⏰ Undo toast closing...');
-  console.log('Deleted employee:', deletedEmployee);
-  console.log('Undo clicked:', undoClicked.current);
-  
   setUndoToast(null);
   
-  // Only permanently delete if undo was NOT clicked
   if (deletedEmployee && !undoClicked.current) {
     try {
-      console.log('🔥 Permanently deleting ID:', deletedEmployee._id);
+      console.log('🔥 Deleting employee ID:', deletedEmployee._id);
       
-      // Delete from backend
       await employeeService.deleteEmployee(deletedEmployee._id);
       
       console.log('✅ Successfully deleted from backend');
-      
       showToast(`${deletedEmployee.name} permanently deleted`, 'success');
-      setDeletedEmployee(null);
-      
-      // Refresh the list from backend to ensure sync
-      await fetchEmployees();
       
     } catch (err) {
-      console.error('❌ Delete failed:', err);
+      console.error('❌ Delete error:', err);
       
-      // If delete fails, restore the employee using callback form
-      setEmployees(prevEmployees => {
-        // Check if employee already exists (to avoid duplicates)
-        const exists = prevEmployees.some(emp => emp._id === deletedEmployee._id);
-        if (exists) {
+      // Check if employee simply wasn't in database
+      if (err.message === 'Employee not found' || 
+          err.message?.includes('not found')) {
+        
+        // Employee wasn't in DB - that's okay, it's gone from UI anyway
+        console.log('ℹ️ Employee was not in database');
+        showToast(`${deletedEmployee.name} removed`, 'success');
+        
+      } else {
+        // Real error - restore the employee
+        setEmployees(prevEmployees => {
+          const exists = prevEmployees.some(emp => emp._id === deletedEmployee._id);
+          if (!exists) {
+            return [...prevEmployees, deletedEmployee];
+          }
           return prevEmployees;
-        }
-        return [...prevEmployees, deletedEmployee];
-      });
-      
-      showToast(err.message || 'Failed to delete employee', 'error');
+        });
+        
+        showToast('Failed to delete: ' + (err.message || 'Unknown error'), 'error');
+      }
+    } finally {
       setDeletedEmployee(null);
     }
   }
   
-  // Reset the flag for next delete
   undoClicked.current = false;
 };
 
