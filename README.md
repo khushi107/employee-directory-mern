@@ -230,6 +230,12 @@ DELETE /api/employees/:id
 ### Delete with Undo
 ![Delete Undo](screenshots/delete-undo.png)
 
+
+![Delete Undo](screenshots/delete-undo1.png)
+
+### Search Filter
+![Search Filter](screenshots/search-filter.png)
+
 ## 🎯 Key Features Explained
 
 ### Search & Filter
